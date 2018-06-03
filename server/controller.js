@@ -1,5 +1,9 @@
+const fs = require('fs')
+const util = require('util')
 const request = require('request')
 require('dotenv').config()
+
+const saveForm = require('./functions/typeform-getter')
 
 const verifyToken = (ctx) => {
   if (ctx.query['hub.verify_token'] === process.env.VERIFY_TOKEN) {
@@ -47,4 +51,38 @@ const receiveMessage = (ctx) => {
   }
 }
 
-module.exports = { receiveMessage, verifyToken }
+const readFile = util.promisify(fs.readFile)
+
+let counter = 1
+const data = []
+
+const getQuestions = async() => {
+  console.log('called')
+  try {
+    let data = await readFile(__dirname + '/data/questions.json')
+    data = JSON.parse(data)
+    return data
+  } catch (e) {
+    console.error('[ERR] getQuestions: ', e)
+  }
+}
+
+const startSurvey = async (ctx) => {
+  try {
+    let questions = await getQuestions()
+    if (!questions) {
+      await saveForm()
+      questions = await getQuestions()
+    }
+  } catch (error) {
+    console.error('[ERR] startSurvey: ', error)
+  }
+}
+
+startSurvey()
+
+module.exports = { 
+  verifyToken,
+  startSurvey,
+  receiveMessage, 
+}

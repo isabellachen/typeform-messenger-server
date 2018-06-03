@@ -1,9 +1,12 @@
 const fs = require('fs')
+const util = require('util')
 const fetch = require('cross-fetch')
 require('dotenv').config()
 
 const conf = require('../../private/conf.json')
 const typeformToken = conf.tokens.typeform
+
+const writeFile = util.promisify(fs.writeFile)
 
 const getForm = async () => {
   const form = await fetch(`https://api.typeform.com/forms/${process.env.FORM_ID}`, {
@@ -17,10 +20,8 @@ const getForm = async () => {
 
 const saveForm = async () => {
   const form = await getForm()
-  fs.writeFile(__dirname + '/../data/questions.json', JSON.stringify(form), (e) => {
-    if (e) console.error('error writing to questions.json', e)
-    else console.log('form fields were saved')
-  })
+  await writeFile(__dirname + '/../data/questions.json', JSON.stringify(form))
+  return form
 }
 
 
