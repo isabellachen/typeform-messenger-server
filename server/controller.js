@@ -4,6 +4,7 @@ const request = require('request')
 require('dotenv').config()
 
 const saveForm = require('./functions/typeform-getter')
+const readFile = util.promisify(fs.readFile)
 
 const verifyToken = (ctx) => {
   if (ctx.query['hub.verify_token'] === process.env.VERIFY_TOKEN) {
@@ -51,13 +52,11 @@ const receiveMessage = (ctx) => {
   }
 }
 
-const readFile = util.promisify(fs.readFile)
 
-let counter = 1
+let counter = 0
 const data = []
 
 const getQuestions = async() => {
-  console.log('called')
   try {
     let data = await readFile(__dirname + '/data/questions.json')
     data = JSON.parse(data)
@@ -67,19 +66,50 @@ const getQuestions = async() => {
   }
 }
 
+
 const startSurvey = async (ctx) => {
   try {
+    let body = ctx.request.body
+
     let questions = await getQuestions()
     if (!questions) {
       await saveForm()
       questions = await getQuestions()
     }
+  
+    //working temprementally, for some reason an infinite loop is created or all questions at sent at one go... why?
+    if (body.object === 'page') {
+      body.entry.forEach((entry) => {
+        let event = entry.messaging[0]
+        let sender_psid = event.sender.id   
+        if (event.message) {
+          if (counter === 0) {         
+            sendMessage(sender_psid, {text: questions[counter].title})
+            counter ++
+          } else if (questions[counter]) {
+            //receive answer
+            console.log('EVENT: ', event.message.text)
+            if (event.message) console.log(event.message.text)
+            sendMessage(sender_psid, { text: questions[counter].title })
+            counter ++
+          } 
+        }
+        ctx.status = 200
+      })
+    } else {
+      ctx.status = 404
+    }
+
+    //if counter === 0, start by sending the first questions
+    //if not, save the event.message.text or event.postback
+
+    //pick question depending on counter - question[counter]
+    //format payload to fb depending on question[counter].type
+    //construct response and save to data
   } catch (error) {
     console.error('[ERR] startSurvey: ', error)
   }
 }
-
-startSurvey()
 
 module.exports = { 
   verifyToken,
