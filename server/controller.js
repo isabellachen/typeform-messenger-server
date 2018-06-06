@@ -4,7 +4,12 @@ const request = require('request')
 require('dotenv').config()
 
 const saveForm = require('./functions/typeform-getter')
+const translateQuestions = require('./functions/translate-questions')
 const readFile = util.promisify(fs.readFile)
+
+let translatedQuestions
+let counter = 0
+const answers = []
 
 const verifyToken = (ctx) => {
   if (ctx.query['hub.verify_token'] === process.env.VERIFY_TOKEN) {
@@ -16,14 +21,14 @@ const verifyToken = (ctx) => {
   }
 }
 
-function sendMessage(recipientId, message) {
+function sendMessage(recipientId, response) {
   request({
     url: 'https://graph.facebook.com/v3.0/me/messages',
     qs: { access_token: process.env.PAGE_ACCESS_TOKEN },
     method: 'POST',
     json: {
       recipient: { id: recipientId },
-      message: message,
+      message: response,
     }
   }, function (error, response, body) {
     if (error) {
@@ -53,9 +58,6 @@ const receiveMessage = (ctx) => {
 }
 
 
-let counter = 0
-const data = []
-
 const getQuestions = async() => {
   try {
     let data = await readFile(__dirname + '/data/questions.json')
@@ -66,6 +68,13 @@ const getQuestions = async() => {
   }
 }
 
+const addQuestion = (question) => {
+  answers[counter] = {question}
+}
+
+const saveReply = (answer) => {
+  if (answers[counter - 1]) answers[counter - 1].answer = answer
+}
 
 const startSurvey = async (ctx) => {
   try {
@@ -77,20 +86,23 @@ const startSurvey = async (ctx) => {
       questions = await getQuestions()
     }
   
-    //working temprementally, for some reason an infinite loop is created or all questions at sent at one go... why?
+    if (!translatedQuestions) translatedQuestions = translateQuestions(questions) 
+
     if (body.object === 'page') {
       body.entry.forEach((entry) => {
         let event = entry.messaging[0]
         let sender_psid = event.sender.id   
         if (event.message) {
-          if (counter === 0) {         
-            sendMessage(sender_psid, {text: questions[counter].title})
+          if (counter === 0) {    
+            addQuestion(questions[counter].title) 
+            sendMessage(sender_psid, translatedQuestions[counter])
             counter ++
           } else if (questions[counter]) {
-            //receive answer
-            console.log('EVENT: ', event.message.text)
-            if (event.message) console.log(event.message.text)
-            sendMessage(sender_psid, { text: questions[counter].title })
+            //receive answer and save event.message.text or postback
+            saveReply(event.message.text)
+            addQuestion(questions[counter].title) 
+            console.log(answers)
+            sendMessage(sender_psid, translatedQuestions[counter])
             counter ++
           } 
         }
@@ -99,13 +111,6 @@ const startSurvey = async (ctx) => {
     } else {
       ctx.status = 404
     }
-
-    //if counter === 0, start by sending the first questions
-    //if not, save the event.message.text or event.postback
-
-    //pick question depending on counter - question[counter]
-    //format payload to fb depending on question[counter].type
-    //construct response and save to data
   } catch (error) {
     console.error('[ERR] startSurvey: ', error)
   }
