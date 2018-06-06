@@ -57,7 +57,6 @@ const receiveMessage = (ctx) => {
   }
 }
 
-
 const getQuestions = async() => {
   try {
     let data = await readFile(__dirname + '/data/questions.json')
@@ -81,10 +80,10 @@ const startSurvey = async (ctx) => {
     let body = ctx.request.body
 
     let questions = await getQuestions()
-    if (!questions) {
-      await saveForm()
-      questions = await getQuestions()
-    }
+    // if (!questions) {
+    //   await saveForm()
+    //   questions = await getQuestions()
+    // }
   
     if (!translatedQuestions) translatedQuestions = translateQuestions(questions) 
 
