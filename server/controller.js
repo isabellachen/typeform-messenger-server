@@ -39,24 +39,6 @@ function sendMessage(recipientId, response) {
   })
 }
 
-const receiveMessage = (ctx) => {
-  let body = ctx.request.body
-  if (body.object === 'page') {
-    body.entry.forEach((entry) => {
-      let event = entry.messaging[0]
-      let sender_psid = event.sender.id
-      if (event.message) {
-        sendMessage(sender_psid, { text: "Echo: " + event.message.text });
-      } else if (event.postback) {
-        //
-      }
-      ctx.status = 200
-    })
-  } else {
-    ctx.status = 404
-  }
-}
-
 const getQuestions = async() => {
   try {
     let data = await readFile(__dirname + '/data/questions.json')
@@ -75,35 +57,46 @@ const saveReply = (answer) => {
   if (answers[counter - 1]) answers[counter - 1].answer = answer
 }
 
+const handleMessage = (event, questions) => {
+  let sender_psid = event.sender.id  
+  if (counter === 0) {
+    addQuestion(questions[counter].title)
+    sendMessage(sender_psid, translatedQuestions[counter])
+    counter++
+  } else if (questions[counter]) {
+    saveReply(event.message.text)
+    addQuestion(questions[counter].title)
+    sendMessage(sender_psid, translatedQuestions[counter])
+    counter++
+  } 
+}
+
+const handlePostback = (event, questions) => {
+  console.log(event)
+}
+
 const startSurvey = async (ctx) => {
   try {
     let body = ctx.request.body
 
     let questions = await getQuestions()
-    // if (!questions) {
-    //   await saveForm()
-    //   questions = await getQuestions()
-    // }
   
     if (!translatedQuestions) translatedQuestions = translateQuestions(questions) 
 
     if (body.object === 'page') {
-      body.entry.forEach((entry) => {
-        let event = entry.messaging[0]
-        let sender_psid = event.sender.id   
+      body.entry.forEach((entry) => { 
+        let event
+        if (entry.messaging) {
+          event = entry.messaging[0]
+        } else if (entry.standby) {
+          event = entry.standby[0]
+        }
         if (event.message) {
-          if (counter === 0) {    
-            addQuestion(questions[counter].title) 
-            sendMessage(sender_psid, translatedQuestions[counter])
-            counter ++
-          } else if (questions[counter]) {
-            //receive answer and save event.message.text or postback
-            saveReply(event.message.text)
-            addQuestion(questions[counter].title) 
-            console.log(answers)
-            sendMessage(sender_psid, translatedQuestions[counter])
-            counter ++
-          } 
+          handleMessage(event, questions)
+        } else if (event.postback && event.postback.payload) {
+          console.log('POSTBACK: ', event.postback)
+          // let payload = received_postback.payload
+          // handlePostback(payload, questions)
         }
         ctx.status = 200
       })
@@ -117,6 +110,5 @@ const startSurvey = async (ctx) => {
 
 module.exports = { 
   verifyToken,
-  startSurvey,
-  receiveMessage, 
+  startSurvey
 }
