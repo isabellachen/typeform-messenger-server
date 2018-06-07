@@ -5,9 +5,11 @@ require('dotenv').config()
 
 const saveForm = require('./functions/typeform-getter')
 const translateQuestions = require('./functions/translate-questions')
+const translateForm = require('./functions/translate-form')
 const readFile = util.promisify(fs.readFile)
 
 let translatedQuestions
+let translatedForm
 let counter = 0
 const answers = []
 
@@ -39,13 +41,13 @@ function sendMessage(recipientId, response) {
   })
 }
 
-const getQuestions = async() => {
+const getForm = async() => {
   try {
-    let data = await readFile(__dirname + '/data/questions.json')
+    let data = await readFile(__dirname + '/data/form.json')
     data = JSON.parse(data)
     return data
   } catch (e) {
-    console.error('[ERR] getQuestions: ', e)
+    console.error('[ERR] getForm: ', e)
   }
 }
 
@@ -57,18 +59,32 @@ const saveReply = (answer) => {
   if (answers[counter - 1]) answers[counter - 1].answer = answer
 }
 
-const handleMessage = (event, questions) => {
+const handleMessage = (event, translatedForm) => {
   let sender_psid = event.sender.id  
   if (counter === 0) {
-    addQuestion(questions[counter].title)
-    sendMessage(sender_psid, translatedQuestions[counter])
+    sendMessage(sender_psid, translatedForm[counter])
+    counter ++
+  } else if (counter === 1) {
+    addQuestion(translatedForm[counter].title)
+    sendMessage(sender_psid, translatedForm[counter])
     counter++
-  } else if (questions[counter]) {
+  } else if (translatedForm[counter]) {
     saveReply(event.message.text)
-    addQuestion(questions[counter].title)
-    sendMessage(sender_psid, translatedQuestions[counter])
-    counter++
-  } 
+    addQuestion(translatedForm[counter].title)
+    sendMessage(sender_psid, translatedForm[counter])
+    counter ++
+  }
+  
+  // if (counter === 0) {
+  //   addQuestion(questions[counter].title)
+  //   sendMessage(sender_psid, translatedForm[counter])
+  //   counter++
+  // } else if (questions[counter]) {
+  //   saveReply(event.message.text)
+  //   addQuestion(questions[counter].title)
+  //   sendMessage(sender_psid, translatedForm[counter])
+  //   counter++
+  // } 
 }
 
 const handlePostback = (event, questions) => {
@@ -77,11 +93,11 @@ const handlePostback = (event, questions) => {
 
 const startSurvey = async (ctx) => {
   try {
-    let body = ctx.request.body
+    const body = ctx.request.body
 
-    let questions = await getQuestions()
+    const form = await getForm()
   
-    if (!translatedQuestions) translatedQuestions = translateQuestions(questions) 
+    if (!translatedForm) translatedForm = translateForm(form) 
 
     if (body.object === 'page') {
       body.entry.forEach((entry) => { 
@@ -90,7 +106,7 @@ const startSurvey = async (ctx) => {
         event = entry.messaging[0]
         if (event.message) {
           console.log('MESSAGE: ', event.message)
-          handleMessage(event, questions)
+          handleMessage(event, translatedForm)
         } else if (event.postback && event.postback.payload) {
           console.log('POSTBACK: ', event.postback)
           // let payload = received_postback.payload

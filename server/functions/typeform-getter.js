@@ -14,13 +14,13 @@ const getForm = async () => {
       "Authorization": `bearer ${typeformToken}`
     }
   }).then(res => res.json())
-  const fields = form.fields
-  return fields
+
+  return form
 }
 
 const saveForm = async () => {
   const form = await getForm()
-  await writeFile(__dirname + '/../data/questions.json', JSON.stringify(form))
+  await writeFile(__dirname + '/../data/form.json', JSON.stringify(form))
   return form
 }
 
