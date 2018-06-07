@@ -85,13 +85,11 @@ const startSurvey = async (ctx) => {
 
     if (body.object === 'page') {
       body.entry.forEach((entry) => { 
+        console.log('ENTRY: ', entry)
         let event
-        if (entry.messaging) {
-          event = entry.messaging[0]
-        } else if (entry.standby) {
-          event = entry.standby[0]
-        }
+        event = entry.messaging[0]
         if (event.message) {
+          console.log('MESSAGE: ', event.message)
           handleMessage(event, questions)
         } else if (event.postback && event.postback.payload) {
           console.log('POSTBACK: ', event.postback)
