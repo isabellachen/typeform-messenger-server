@@ -1,18 +1,17 @@
+const translateFunctions = require('./translate-functions')
+const { translateWelcomeScreen,
+        translateMultipleChoice,
+      } = translateFunctions
+
 const translateForm = (data) => {
+
   const welcomeScreen = []
   if (data.welcome_screens) {
     const welcome = data.welcome_screens[0]
-    let response = {}
-    response.text = welcome.title
-    response.quick_replies = [
-      {
-        content_type: "text",
-        title: welcome.properties.button_text,
-        payload: "start",
-      }
-    ]
+    let response = translateWelcomeScreen(welcome)
     welcomeScreen.push(response)
   }
+
   const translatedQuestions = data.fields.map(question => {
     const response = {}
     if (question.type === 'short_text') {
@@ -20,22 +19,7 @@ const translateForm = (data) => {
       return response
     }
     if (question.type === 'multiple_choice') {
-      const choices = question.properties.choices.map(choice => {
-        return {
-          type: 'postback',
-          title: choice.label,
-          payload: choice.label
-        }
-      })
-      response.attachment = {
-        type: 'template',
-        payload: {
-          template_type: 'button',
-          text: question.title,
-          buttons: choices
-        }
-      }
-      return response
+      return translateMultipleChoice(question)
     }
     if (question.type === 'email') {
       response.text = question.title
