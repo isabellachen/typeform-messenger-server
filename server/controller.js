@@ -4,11 +4,9 @@ const request = require('request')
 require('dotenv').config()
 
 const saveForm = require('./functions/typeform-getter')
-const translateQuestions = require('./functions/translate-questions')
 const translateForm = require('./functions/translate-form')
 const readFile = util.promisify(fs.readFile)
 
-let translatedQuestions
 let translatedForm
 let counter = 0
 const answers = []
@@ -74,17 +72,6 @@ const handleMessage = (event, translatedForm) => {
     sendMessage(sender_psid, translatedForm[counter])
     counter ++
   }
-  
-  // if (counter === 0) {
-  //   addQuestion(questions[counter].title)
-  //   sendMessage(sender_psid, translatedForm[counter])
-  //   counter++
-  // } else if (questions[counter]) {
-  //   saveReply(event.message.text)
-  //   addQuestion(questions[counter].title)
-  //   sendMessage(sender_psid, translatedForm[counter])
-  //   counter++
-  // } 
 }
 
 const handlePostback = (event, questions) => {
