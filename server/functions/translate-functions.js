@@ -1,11 +1,11 @@
 const translateWelcomeScreen = (data) => {
-  let response = {}
+  const response = {}
   response.text = data.title
   response.quick_replies = [
     {
       content_type: "text",
       title: data.properties.button_text,
-      payload: "start",
+      payload: data.properties.button_text,
     }
   ]
   return response
@@ -15,9 +15,23 @@ const translateShortText = (question) => {
   return {text: question.title}
 }
 
+const translateStatement = (question) => {
+  //translate TF statement tp FB quick reply
+  const response = {}
+  response.text = question.title //fix to account for dynamic {{field}} in question tite
+  response.quick_replies = [
+    {
+      content_type: "text",
+      title: question.properties.button_text,
+      payload: question.properties.button_text,
+    }
+  ]
+  return response
+}
+
 const translateMultipleChoice = (question) => {
   //translate TF multiple choice to FB template with buttons
-  let response = {}
+  const response = {}
   const choices = question.properties.choices.map(choice => {
     return {
       type: 'postback',
@@ -39,5 +53,6 @@ const translateMultipleChoice = (question) => {
 module.exports = {
   translateWelcomeScreen,
   translateShortText,
+  translateStatement,
   translateMultipleChoice,
 }

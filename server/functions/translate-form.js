@@ -1,12 +1,13 @@
 const translateFunctions = require('./translate-functions')
 const { translateWelcomeScreen,
+        translateShortText,
         translateMultipleChoice,
       } = translateFunctions
 
 const translateForm = (data) => {
 
-  const welcomeScreen = []
   if (data.welcome_screens) {
+    const welcomeScreen = []
     const welcome = data.welcome_screens[0]
     let response = translateWelcomeScreen(welcome)
     welcomeScreen.push(response)
@@ -15,8 +16,7 @@ const translateForm = (data) => {
   const translatedQuestions = data.fields.map(question => {
     const response = {}
     if (question.type === 'short_text') {
-      response.text = question.title
-      return response
+      return translateShortText(question)
     }
     if (question.type === 'multiple_choice') {
       return translateMultipleChoice(question)
