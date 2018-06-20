@@ -42,7 +42,7 @@ describe('should translate short text questions', () => {
   it('should be an object', () => {
     question.should.be.an('object')
   })
-  it ('should have as response title the question title from Typeform', () => {
+  it('should have a text property that is the Typeform question', () => {
     question.should.have.property('text', shortTextQuestion.title)
   })
 })
@@ -56,6 +56,10 @@ describe('should translate statement questions', () => {
   it('should be an object', () => {
     question.should.be.an('object')
   })
+
+  it('should have a text property that is the Typeform question', () => {
+    question.should.have.property('text', statementQuestion.title)
+  })
 })
 
 describe('should translate multiple choice questions', () => {
@@ -68,6 +72,9 @@ describe('should translate multiple choice questions', () => {
 
   it('should be an object', () => {
     question.should.be.an('object')
+  })
+  it('should not have a text property', () => {
+    question.should.have.property('text')
   })
   it('should have an attachment property', () => {
     question.should.have.property('attachment')

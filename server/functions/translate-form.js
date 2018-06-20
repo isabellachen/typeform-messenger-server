@@ -6,32 +6,44 @@ const { translateWelcomeScreen,
 
 const translateForm = (data) => {
 
+  const welcomeScreen = []
   if (data.welcome_screens) {
-    const welcomeScreen = []
     const welcome = data.welcome_screens[0]
-    let response = translateWelcomeScreen(welcome)
+    let response = {
+      response: translateWelcomeScreen(welcome),
+      type: 'welcome_screen',
+      ref: welcome.ref,
+    }
     welcomeScreen.push(response)
   }
 
   const translatedQuestions = data.fields.map(question => {
-    const response = {}
+    const response = {} //to be deleted after refactor
     if (question.type === 'short_text') {
-      return translateShortText(question)
+      return {
+        response: translateShortText(question),
+        type: question.type,
+        ref: question.ref,
+      }
     }
     if (question.type === 'multiple_choice') {
-      return translateMultipleChoice(question)
+      return {
+        response: translateMultipleChoice(question),
+        type: question.type,
+        ref: question.ref,
+      }
     }
     if (question.type === 'email') {
       response.text = question.title
-      return response
+      return response //to be deleted
     }
     if (question.type === 'picture_choice') {
       response.text = question.title
-      return response
+      return response //to be deleted
     }
     if (question.type === 'long_text') {
       response.text = question.title
-      return response
+      return response //to be deleted
     }
   })
   const translatedForm = [
@@ -41,5 +53,6 @@ const translateForm = (data) => {
 
   return translatedForm
 }
+
 
 module.exports = translateForm

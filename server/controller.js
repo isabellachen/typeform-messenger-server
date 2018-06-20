@@ -50,7 +50,19 @@ const getForm = async() => {
 }
 
 const addQuestion = (question) => {
-  answers[counter] = {question}
+  if (question.type === 'multiple_choice') {
+    answers[counter] = {
+      question: question.response.attachment.payload.text,
+      ref: question.ref,
+      type: question.type,
+    }
+  } else {
+    answers[counter] = {
+      question: question.response.text,
+      ref: question.ref,
+      type: question.type,
+    }
+  }
 }
 
 const saveReply = (answer) => {
@@ -60,16 +72,20 @@ const saveReply = (answer) => {
 const handleMessage = (event, translatedForm) => {
   let sender_psid = event.sender.id  
   if (counter === 0) {
-    sendMessage(sender_psid, translatedForm[counter])
+    //there is an assumption that the first is not a question
+    
+    sendMessage(sender_psid, translatedForm[counter].response)
     counter ++
   } else if (counter === 1) {
-    addQuestion(translatedForm[counter].title)
-    sendMessage(sender_psid, translatedForm[counter])
+    
+    addQuestion(translatedForm[counter])
+    sendMessage(sender_psid, translatedForm[counter].response)
     counter++
-  } else if (translatedForm[counter]) {
+  } else if (translatedForm[counter].response) {
+    
     saveReply(event.message.text)
-    addQuestion(translatedForm[counter].title)
-    sendMessage(sender_psid, translatedForm[counter])
+    addQuestion(translatedForm[counter])
+    sendMessage(sender_psid, translatedForm[counter].response)
     counter ++
   }
 }
@@ -95,6 +111,7 @@ const startSurvey = async (ctx) => {
           console.log('MESSAGE: ', event.message)
           handleMessage(event, translatedForm)
         } else if (event.postback && event.postback.payload) {
+          console.log('ANSWERS: ', answers)
           console.log('POSTBACK: ', event.postback)
           // let payload = received_postback.payload
           // handlePostback(payload, questions)
