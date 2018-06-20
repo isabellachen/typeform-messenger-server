@@ -11,6 +11,10 @@ const translateWelcomeScreen = (data) => {
   return response
 }
 
+const translateShortText = (question) => {
+  return {text: question.title}
+}
+
 const translateMultipleChoice = (question) => {
   //translate TF multiple choice to FB template with buttons
   let response = {}
@@ -34,5 +38,6 @@ const translateMultipleChoice = (question) => {
 
 module.exports = {
   translateWelcomeScreen,
+  translateShortText,
   translateMultipleChoice,
 }
