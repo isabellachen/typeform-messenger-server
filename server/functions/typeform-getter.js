@@ -20,7 +20,10 @@ const getForm = async () => {
 
 const saveForm = async () => {
   const form = await getForm()
-  await writeFile(__dirname + '/../data/form.json', JSON.stringify(form))
+  fs.writeFile(__dirname + '/../data/form.json', JSON.stringify(form), (err) => {
+    if (err) throw err;
+    console.log('The form has been saved!');
+  })
   return form
 }
 

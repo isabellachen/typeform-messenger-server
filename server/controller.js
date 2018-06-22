@@ -3,7 +3,6 @@ const util = require('util')
 const request = require('request')
 require('dotenv').config()
 
-const saveForm = require('./functions/typeform-getter')
 const translateForm = require('./functions/translate-form')
 const readFile = util.promisify(fs.readFile)
 
@@ -69,29 +68,29 @@ const saveReply = (answer) => {
   if (answers[counter - 1]) answers[counter - 1].answer = answer
 }
 
-const handleMessage = (event, translatedForm) => {
-  let sender_psid = event.sender.id  
-  if (counter === 0) {
-    //there is an assumption that the first is not a question
-    
-    sendMessage(sender_psid, translatedForm[counter].response)
-    counter ++
-  } else if (counter === 1) {
-    
-    addQuestion(translatedForm[counter])
-    sendMessage(sender_psid, translatedForm[counter].response)
-    counter++
-  } else if (translatedForm[counter].response) {
-    
-    saveReply(event.message.text)
-    addQuestion(translatedForm[counter])
-    sendMessage(sender_psid, translatedForm[counter].response)
-    counter ++
-  }
+const persistAnswers = () => {
+  fs.writeFile(__dirname + '/data/answers.json', JSON.stringify(answers), (err) => {
+    if (err) throw err;
+    console.log('The answers has been updated!');
+  })
 }
 
-const handlePostback = (event, questions) => {
-  console.log(event)
+const addQuestionSendMessage = (sender_psid, response) => {
+  addQuestion(translatedForm[counter])
+  persistAnswers()
+  sendMessage(sender_psid, response)
+  counter++
+}
+
+
+const handleMessage = (event) => {
+  if (answers.length > 0) saveReply(event.message.text)
+  addQuestionSendMessage(event.sender.id, translatedForm[counter].response)
+}
+
+const handlePostback = (event) => {
+  if (answers.length > 0) saveReply(event.postback.payload)
+  addQuestionSendMessage(event.sender.id, translatedForm[counter].response)
 }
 
 const startSurvey = async (ctx) => {
@@ -100,21 +99,18 @@ const startSurvey = async (ctx) => {
 
     const form = await getForm()
   
-    if (!translatedForm) translatedForm = translateForm(form) 
+    if (!translatedForm) translatedForm = translateForm(form)
 
     if (body.object === 'page') {
       body.entry.forEach((entry) => { 
-        console.log('ENTRY: ', entry)
         let event
         event = entry.messaging[0]
         if (event.message) {
-          console.log('MESSAGE: ', event.message)
-          handleMessage(event, translatedForm)
+          console.log('event.message: ', event.message)
+          handleMessage(event)
         } else if (event.postback && event.postback.payload) {
-          console.log('ANSWERS: ', answers)
-          console.log('POSTBACK: ', event.postback)
-          // let payload = received_postback.payload
-          // handlePostback(payload, questions)
+          console.log('event.postback: ', event.postback)
+          handlePostback(event)
         }
         ctx.status = 200
       })
