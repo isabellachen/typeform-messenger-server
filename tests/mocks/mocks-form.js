@@ -53,11 +53,21 @@ module.exports = {
     {
       "id": "ccSRxhfKXQbS",
       "title": "What's your name?",
-      "ref": "4b1e1e426d0a32fa",
+      "ref": "21f3cad52ba8e177",
       "validations": {
         "required": true
       },
       "type": "short_text"
+    },
+    {
+      "id": "qKvpPwlPbSVY",
+      "title": "Okay, {{field:21f3cad52ba8e177}}, are you ready to do some eventing?",
+      "ref": "d72ef5e227f6d257",
+      "properties": {
+        "hide_marks": false,
+        "button_text": "I'm ready, let me check out this event!"
+      },
+      "type": "statement"
     },
     {
       "id": "aSq94QQkXhqa",
