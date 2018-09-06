@@ -19,6 +19,7 @@ const translateStatement = (question) => {
   //translate TF statement tp FB quick reply
   const response = {}
   response.text = question.title //fix to account for dynamic {{field}} in question tite
+  //regex question.title, check if there is a {{field}} and look in answers to see if there is a question-answer pair with the field
   response.quick_replies = [
     {
       content_type: "text",

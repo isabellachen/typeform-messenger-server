@@ -18,7 +18,7 @@ const translateForm = (data) => {
   }
 
   const translatedQuestions = data.fields.map(question => {
-    const response = {} //to be deleted after refactor
+    const response = {} 
     if (question.type === 'short_text') {
       return {
         response: translateShortText(question),
