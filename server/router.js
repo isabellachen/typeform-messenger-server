@@ -1,22 +1,12 @@
-const Router = require('koa-router')
-const fetch = require('cross-fetch')
-const request = require('request')
-require('dotenv').config()
+const Router = require('koa-router');
+require('dotenv').config();
 
-const {
-  verifyToken,
-  startSurvey,
-  receiveMessage,
-} = require('./controller')
+const { verifyToken } = require('./services');
+const { startSurvey } = require('./controllers');
 
-const conf = require('../private/conf.json')
-const typeformToken = conf.tokens.typeform
+const router = new Router();
 
-const router = new Router()
-
-router.get('/webhooks', verifyToken)
-// router.post('/webhooks', receiveMessage);
+router.get('/webhooks', verifyToken);
 router.post('/webhooks', startSurvey);
 
-
-module.exports = router
+module.exports = router;

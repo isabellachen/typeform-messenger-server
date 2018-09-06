@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const verifyToken = ctx => {
   if (ctx.query['hub.verify_token'] === process.env.VERIFY_TOKEN) {
     ctx.body = ctx.query['hub.challenge'];

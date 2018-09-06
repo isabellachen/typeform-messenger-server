@@ -4,7 +4,7 @@ const request = require('request');
 require('dotenv').config();
 const readFile = util.promisify(fs.readFile);
 
-const { verifyToken } = require('./services/verifyToken');
+const { verifyToken } = require('./helpers/verifyToken');
 
 const translateForm = require('./functions/translate-form');
 
