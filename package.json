@@ -14,7 +14,8 @@
     "koa": "^2.5.1",
     "koa-bodyparser": "^4.2.1",
     "koa-router": "^7.4.0",
-    "request": "^2.87.0"
+    "request": "^2.87.0",
+    "typeform-to-facebook-messenger": "^1.0.4"
   },
   "devDependencies": {
     "chai": "^4.1.2",
