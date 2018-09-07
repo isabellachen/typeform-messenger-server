@@ -9,11 +9,9 @@ const startSurvey = async ctx => {
         let event;
         event = entry.messaging[0];
         if (event.message) {
-          console.log('event.message: ', event.message);
           handleMessage(event);
           ctx.status = 200;
         } else if (event.postback && event.postback.payload) {
-          console.log('event.postback: ', event.postback);
           handlePostback(event);
         }
         ctx.status = 200;
