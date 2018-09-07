@@ -1,7 +1,25 @@
+const fs = require('fs');
+const util = require('util');
+const request = require('request');
+const readFile = util.promisify(fs.readFile);
 require('dotenv').config();
 
-const { addQuestion, saveReply, persistAnswers } = require('../models');
-let { translatedForm, counter, answers } = require('./index');
+const { db } = require('../models');
+const translateForm = require('../functions/translate-form');
+
+let counter = 0;
+let translatedForm;
+
+//translate the form and set up the 'db'
+readFile(__dirname + '/../data/form.json')
+  .then(data => JSON.parse(data))
+  .then(json => {
+    translatedForm = translateForm(json);
+    if (!db.questions) {
+      db.questions = json.fields.map(field => field.title);
+    }
+  })
+  .catch(e => console.error(e));
 
 function sendMessage(recipientId, response) {
   request(
@@ -24,23 +42,27 @@ function sendMessage(recipientId, response) {
   );
 }
 
-const addQuestionSendMessage = (sender_psid, response) => {
-  addQuestion(translatedForm[counter]);
-  persistAnswers();
-  sendMessage(sender_psid, response);
+const saveAnswer = (sender_psid, answer) => {
+  if (!db[sender_psid]) {
+    db[sender_psid] = [answer];
+    console.log('DB BEFORE: ', db);
+  } else {
+    db[sender_psid].push(answer);
+    console.log('DB AFTER: ', db);
+  }
+};
+
+const handleMessage = async event => {
+  saveAnswer(event.sender.id, event.message.text); //omit first message
+  if (!db.questions) saveQuestions();
+  sendMessage(event.sender.id, translatedForm[counter].response);
   counter++;
 };
 
-const handleMessage = event => {
-  const { answers } = require('./index');
-  console.log('ANSWERS: ', answers);
-  // if (answers.length > 0) saveReply(event.message.text);
-  // addQuestionSendMessage(event.sender.id, translatedForm[counter].response);
-};
-
 const handlePostback = event => {
-  if (answers.length > 0) saveReply(event.postback.payload);
-  addQuestionSendMessage(event.sender.id, translatedForm[counter].response);
+  saveAnswer(event.sender.id, event.postback.payload);
+  sendMessage(event.sender.id, translatedForm[counter].response);
+  counter++;
 };
 
 module.exports = {

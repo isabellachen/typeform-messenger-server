@@ -2,7 +2,6 @@ const { handleMessage, handlePostback } = require('./messageHandler');
 
 const startSurvey = async ctx => {
   try {
-    console.log('body: ', ctx.request.body);
     const body = ctx.request.body;
 
     if (body.object === 'page') {
@@ -12,6 +11,7 @@ const startSurvey = async ctx => {
         if (event.message) {
           console.log('event.message: ', event.message);
           handleMessage(event);
+          ctx.status = 200;
         } else if (event.postback && event.postback.payload) {
           console.log('event.postback: ', event.postback);
           handlePostback(event);
@@ -26,6 +26,4 @@ const startSurvey = async ctx => {
   }
 };
 
-console.log(handleMessage('fooo'));
-
-module.exports = { startSurvey, translatedForm, counter, answers };
+module.exports = { startSurvey };
