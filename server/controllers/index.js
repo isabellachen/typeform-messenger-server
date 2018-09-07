@@ -1,4 +1,4 @@
-const { handleMessage, handlePostback } = require('./messageHandler');
+const { handleMessage } = require('./messageHandler');
 
 const startSurvey = async ctx => {
   try {
