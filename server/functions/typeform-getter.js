@@ -2,9 +2,6 @@ const fs = require('fs');
 const fetch = require('cross-fetch');
 require('dotenv').config();
 
-const conf = require('../../private/conf.json');
-const typeformToken = conf.tokens.typeform;
-
 const getForm = async () => {
   const form = await fetch(
     `https://api.typeform.com/forms/${process.env.FORM_ID}`,
