@@ -1,5 +1,4 @@
 const fs = require('fs');
-const util = require('util');
 const fetch = require('cross-fetch');
 require('dotenv').config();
 
@@ -11,7 +10,7 @@ const getForm = async () => {
     `https://api.typeform.com/forms/${process.env.FORM_ID}`,
     {
       headers: {
-        Authorization: `bearer ${typeformToken}`
+        Authorization: `bearer ${process.env.TYPEFORM_TOKEN}`
       }
     }
   ).then(res => res.json());
