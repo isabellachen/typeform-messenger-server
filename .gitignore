@@ -1,9 +1,5 @@
 /private
 /node_modules
-
-
-/server/data
-answers.json
-questions.json
+/assets
 
 .env

@@ -1,3 +1,6 @@
+#Typeform to Facebook Messenger Server
+A project demonstrating how Typeform forms can be used to create Facebook Messenger Bots. Lots of people, small business owners, NGO field workers, researchers etc. would like to do data collection via Facebook Messenger. Unfortunately, it is not easy to create a Facebook Messenger Bot without some programming knowledge. However, anyone can create a Typeform form. Typeform to Facebook Messenger Server is a starting point for how this can be done.
+
 Make sure server is running, `nodemon server/index.js` from the root.
 Server is configured to run on port 3000
 
@@ -21,12 +24,13 @@ VERIFY_TOKEN=
 FORM_ID=<TYPEFORM_FORM_ID>
 ```
 
- Page access token you get from [facebook developer](https://developers.facebook.com/apps/1839348233033683/messenger/settings/) under token generation. Select a page and a random token will be generated. You then need to subscribe with the curl request above.
+Page access token you get from [facebook developer](https://developers.facebook.com/apps/1839348233033683/messenger/settings/) under token generation. Select a page and a random token will be generated. You then need to subscribe with the curl request above.
 
 Verify token is something you create. Can be anything, 'i love cupcakes' or some uuid, whatever. You set this in the facebook developer dashboard. [Products> webhooks> edit subscription](https://developers.facebook.com/apps/1839348233033683/webhooks/) where you can update the ngrok host and the verify token.
 
 The [bot lives here](https://www.facebook.com/typeform.messenger). You need to say hi to start the conversation.
 
 To-do:
+
 1. Complete the suite of functions to translate all TF questions types to FB question types.
 2. Abstract the functions for handling messages and postbacks from the FB hooks.
