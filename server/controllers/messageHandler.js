@@ -4,7 +4,7 @@ const request = require('request');
 const readFile = util.promisify(fs.readFile);
 require('dotenv').config();
 
-const { db } = require('../models');
+const { db, persistDb } = require('../models');
 const translateForm = require('../functions/translate-form');
 
 let counter = 0;
@@ -45,11 +45,10 @@ function sendMessage(recipientId, response) {
 const saveAnswer = (sender_psid, answer) => {
   if (!db[sender_psid]) {
     db[sender_psid] = [answer];
-    console.log('DB BEFORE: ', db);
   } else {
     db[sender_psid].push(answer);
-    console.log('DB AFTER: ', db);
   }
+  persistDb(db);
 };
 
 const handleMessage = async event => {
