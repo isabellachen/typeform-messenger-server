@@ -34,9 +34,9 @@ function sendMessage(recipientId, response) {
     },
     function(error, response, body) {
       if (error) {
-        console.log('Error sending message: ', error);
+        console.error('Error sending message: ', error);
       } else if (response.body.error) {
-        console.log('Error: ', response.body.error);
+        console.error('Error: ', response.body.error);
       }
     }
   );
@@ -52,19 +52,15 @@ const saveAnswer = (sender_psid, answer) => {
 };
 
 const handleMessage = async event => {
-  saveAnswer(event.sender.id, event.message.text); //omit first message
-  if (!db.questions) saveQuestions();
-  sendMessage(event.sender.id, translatedForm[counter].response);
-  counter++;
-};
-
-const handlePostback = event => {
-  saveAnswer(event.sender.id, event.postback.payload);
-  sendMessage(event.sender.id, translatedForm[counter].response);
-  counter++;
+  if (counter !== translatedForm.length) {
+    //only run if we have not reached the end of the form
+    const answer = event.message ? event.message.text : event.postback.payload;
+    saveAnswer(event.sender.id, answer);
+    sendMessage(event.sender.id, translatedForm[counter].response);
+    counter++;
+  }
 };
 
 module.exports = {
-  handleMessage,
-  handlePostback
+  handleMessage
 };

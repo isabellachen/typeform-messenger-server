@@ -8,11 +8,8 @@ const startSurvey = async ctx => {
       body.entry.forEach(entry => {
         let event;
         event = entry.messaging[0];
-        if (event.message) {
+        if (event.message || (event.postback && event.postback.payload)) {
           handleMessage(event);
-          ctx.status = 200;
-        } else if (event.postback && event.postback.payload) {
-          handlePostback(event);
         }
         ctx.status = 200;
       });
